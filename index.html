@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07131f">
+<title>FuelMind — المصروف الذكي</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FuelMind">
+<meta name="description" content="تطبيق شخصي لتسجيل وتحليل المصروفات اليومية">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'; worker-src 'self'; manifest-src 'self'; media-src 'none'; frame-src 'none'">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{
+  --bg:#07131f;--surface:#0d1d2e;--card:#11243a;--card2:#162b44;--line:#263c55;
+  --text:#f6f3ec;--muted:#94a6ba;--gold:#dda94b;--teal:#38b8a7;--red:#eb6b59;
+  --blue:#6da8ff;--shadow:0 18px 48px rgba(0,0,0,.25);--radius:16px;
+}
+*{box-sizing:border-box}
+html{background:var(--bg);scroll-behavior:smooth}
+body{
+  margin:0;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Arabic','Segoe UI',Tahoma,Arial,sans-serif;
+  background:
+    radial-gradient(circle at 90% -8%,rgba(56,184,167,.12),transparent 30%),
+    radial-gradient(circle at 6% 2%,rgba(221,169,75,.08),transparent 25%),var(--bg);
+  min-height:100vh;padding-bottom:calc(88px + env(safe-area-inset-bottom));
+}
+button,input,select{font:inherit}
+button{cursor:pointer;touch-action:manipulation}
+.app{max-width:620px;margin:0 auto}
+.top{
+  position:sticky;top:0;z-index:30;padding:14px 14px 10px;
+  background:linear-gradient(180deg,rgba(7,19,31,.98),rgba(7,19,31,.90) 76%,transparent);
+  backdrop-filter:blur(14px)
+}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:9px;min-width:0}
+.logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,var(--teal),#227c78);display:grid;place-items:center;font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI';font-weight:700;color:white;box-shadow:0 8px 20px rgba(56,184,167,.18)}
+.brandtext{min-width:0}.brandtext strong{display:block;font-size:13px}.brandtext span{display:block;color:var(--muted);font-size:9.5px;margin-top:1px}
+.save{font-size:9.5px;color:var(--muted);border:1px solid var(--line);background:rgba(17,36,58,.75);border-radius:999px;padding:5px 8px;white-space:nowrap}
+.save.ok{color:var(--teal)}
+main{padding:0 14px 22px}
+.view{display:none;animation:fade .16s ease}.view.active{display:block}
+@keyframes fade{from{opacity:.3;transform:translateY(3px)}to{opacity:1;transform:none}}
+.pagehead{margin:7px 0 14px}.pagehead h1{font-size:22px;margin:0 0 4px;line-height:1.35}.pagehead p{margin:0;color:var(--muted);font-size:11.5px;line-height:1.7}
+.hero{
+  background:linear-gradient(145deg,rgba(22,43,68,.98),rgba(13,29,46,.98));border:1px solid var(--line);
+  border-radius:22px;padding:15px;box-shadow:var(--shadow);overflow:hidden;position:relative
+}
+.hero:before{content:"";position:absolute;width:180px;height:180px;border-radius:50%;background:rgba(56,184,167,.06);left:-85px;top:-90px}
+.cycleline{display:flex;align-items:center;justify-content:space-between;gap:8px;position:relative}
+.kicker{font-size:9.5px;color:var(--muted);font-weight:700}
+.cycledate{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI';font-size:11px;font-weight:700}
+.progress{height:6px;border-radius:999px;background:var(--card2);overflow:hidden;margin:8px 0 5px;position:relative}
+.progress i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--teal),var(--gold))}
+.progressmeta{display:flex;justify-content:space-between;color:var(--muted);font-size:9px}
+.hero-main{display:grid;grid-template-columns:128px 1fr;gap:14px;align-items:center;margin-top:15px;position:relative}
+.ring{
+  width:124px;height:124px;border-radius:50%;display:grid;place-items:center;position:relative;
+  background:conic-gradient(var(--teal) 0deg,var(--teal) var(--ring,250deg),rgba(255,255,255,.06) var(--ring,250deg));
+}
+.ring:after{content:"";position:absolute;inset:11px;border-radius:50%;background:var(--surface);border:1px solid var(--line)}
+.ring-content{position:relative;z-index:1;text-align:center}.ring-content strong{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI';font-size:28px;display:block}.ring-content span{font-size:8.5px;color:var(--muted)}
+.hero-copy h2{font-size:16px;margin:0 0 4px}.hero-copy p{font-size:10.5px;color:var(--muted);line-height:1.65;margin:0}.status{display:inline-flex;margin-top:8px;padding:4px 9px;border-radius:999px;font-size:9.5px;font-weight:700;border:1px solid currentColor}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.metric{background:rgba(7,19,31,.35);border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:10px}
+.metric .v{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI';font-size:17px;font-weight:700;direction:ltr;text-align:right}.metric .k{color:var(--muted);font-size:9.5px;margin-top:3px}
+.section{margin-top:18px}.section-title{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-bottom:8px}.section-title h2{font-size:14px;margin:0}.section-title span{font-size:9.5px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:13px;margin-bottom:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mini{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px;min-height:85px}
+.mini .label{font-size:9.5px;color:var(--muted)}.mini .value{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI';font-size:17px;font-weight:700;margin-top:4px}.mini .sub{font-size:9px;color:var(--muted);margin-top:3px;line-height:1.45}
+.good{color:var(--teal)!important}.warn{color:var(--gold)!important}.bad{color:var(--red)!important}
+.smart{display:flex;gap:9px;align-items:flex-start;padding:11px;border-radius:13px;background:rgba(56,184,167,.055);border:1px solid rgba(56,184,167,.18);margin-bottom:8px}
+.smart .ico{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(56,184,167,.11);color:var(--teal);font-weight:800;flex:0 0 auto}
+.smart.warn{background:rgba(221,169,75,.05);border-color:rgba(221,169,75,.2)}.smart.warn .ico{background:rgba(221,169,75,.12);color:var(--gold)}
+.smart.bad{background:rgba(235,107,89,.05);border-color:rgba(235,107,89,.2)}.smart.bad .ico{background:rgba(235,107,89,.12);color:var(--red)}
+.smart strong{font-size:11px;display:block;margin-bottom:2px;color:var(--text)}.smart p{font-size:9.8px;color:var(--muted);line-height:1.6;margin:0}
+.quickcats{display:flex;gap:7px;overflow:auto;padding-bottom:3px;scrollbar-width:none}.quickcats::-webkit-scrollbar{display:none}
+.quickcat{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:12px;padding:9px 11px;font-size:10px}
+.quickcat small{display:block;color:var(--muted);font-size:8px;margin-top:2px}
+.primary{width:100%;border:none;border-radius:12px;padding:12px;background:var(--gold);color:#0a1724;font-weight:800;font-size:12.5px}
+.secondary{width:100%;border:1px solid var(--line);border-radius:11px;padding:10px;background:var(--card2);color:var(--text);font-size:11px}
+.danger{width:100%;border:1px solid rgba(235,107,89,.65);border-radius:11px;padding:10px;background:transparent;color:var(--red);font-size:11px}
+.form-card{background:linear-gradient(180deg,var(--card),var(--surface));border:1px solid var(--line);border-radius:20px;padding:14px}
+.amount-wrap{text-align:center;padding:8px 0 13px}.amount-wrap label{display:block;color:var(--muted);font-size:10px;margin-bottom:4px}.amount-input{width:100%;border:none;background:transparent;color:var(--text);text-align:center;font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI';font-size:38px;font-weight:700;outline:none}.amount-input::placeholder{color:#53677e}
+.field{margin-bottom:10px}.field label{display:block;font-size:10px;color:var(--muted);margin-bottom:5px}
+input[type=text],input[type=date],input[type=number],select{width:100%;background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px;font-size:11.5px;outline:none}
+input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(221,169,75,.07)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.suggestion{display:none;margin:7px 0 0;border:1px solid rgba(221,169,75,.2);background:rgba(221,169,75,.055);border-radius:10px;padding:8px;font-size:9.5px;color:var(--muted)}
+.suggestion button{border:none;background:none;color:var(--gold);font-weight:800;padding:0}
+.error{display:none;color:var(--red);font-size:10px;margin:8px 0}
+.toolbar{display:flex;gap:7px;margin-bottom:8px}.toolbar input{flex:1}.filterbtn{width:auto;white-space:nowrap}
+.tx{display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid var(--line)}.tx:last-child{border-bottom:none}
+.txicon{width:34px;height:34px;border-radius:10px;background:var(--card2);display:grid;place-items:center;color:var(--muted);font-size:11px;flex:0 0 auto}
+.txmain{flex:1;min-width:0}.txmain strong{display:block;font-size:10.8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.txmain span{display:block;color:var(--muted);font-size:8.7px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txamt{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI';font-size:12px;white-space:nowrap}.tx-actions{display:flex;align-items:center;gap:1px}.edit,.del{border:none;background:none;font-size:16px;padding:4px}.edit{color:var(--gold)}.del{color:var(--red)}
+.chart{width:100%;height:auto;display:block}.legend{display:flex;flex-wrap:wrap;gap:10px;color:var(--muted);font-size:9px;margin-top:7px}.legend span{display:flex;align-items:center;gap:4px}.sw{width:9px;height:3px;border-radius:2px;background:var(--teal)}
+.week{display:flex;align-items:flex-end;gap:6px;height:118px;direction:ltr}.wcol{flex:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px}.wbarwrap{height:78px;width:100%;display:flex;align-items:flex-end;justify-content:center}.wbar{width:min(28px,70%);background:linear-gradient(180deg,var(--teal),rgba(56,184,167,.45));border-radius:7px 7px 2px 2px;min-height:2px}.wamt{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI';font-size:8px;color:var(--muted)}.wlab{font-size:8px;color:var(--muted);direction:rtl}
+.breakdown{display:flex;flex-direction:column;gap:8px}.brow{display:grid;grid-template-columns:118px 1fr 58px;gap:7px;align-items:center}.bname{font-size:9.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.btrack{height:7px;border-radius:999px;background:var(--card2);overflow:hidden}.bfill{height:100%;border-radius:999px}.bval{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI';font-size:9.5px;color:var(--muted);text-align:left}
+.asset-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.asset{padding:12px;background:var(--card);border:1px solid var(--line);border-radius:14px}.asset .name{font-size:10px;color:var(--muted)}.asset .sum{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI';font-size:18px;font-weight:700;margin-top:3px}.asset .desc{font-size:9px;color:var(--muted);margin-top:4px;line-height:1.5}
+.meters{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.meter{text-align:center;background:var(--card2);border:1px solid var(--line);border-radius:11px;padding:9px 5px}.meter .v{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI';font-size:12px;font-weight:700}.meter .k{font-size:8px;color:var(--muted);margin-top:3px}
+.setting{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}.setting:last-child{border-bottom:none}.setting label{font-size:10.5px;color:var(--muted)}.setting input{width:128px;text-align:center}
+.catsearch{margin-bottom:8px}.guide-group{margin-top:12px}.guide-group>h3{font-size:11.5px;margin:0 0 6px}.guide{padding:9px 10px;border:1px solid var(--line);border-radius:11px;background:var(--card2);margin-bottom:6px}.guidehead{display:flex;justify-content:space-between;gap:8px}.guidehead strong{font-size:10px}.pill{font-size:8px;border:1px solid currentColor;border-radius:999px;padding:2px 6px;white-space:nowrap}.guidedesc{font-size:8.8px;color:var(--muted);line-height:1.5;margin-top:3px}.guideex{font-size:8.5px;color:var(--gold);margin-top:3px}
+.datagrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.datagrid button{min-height:42px}
+.bottomnav{
+  position:fixed;z-index:50;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:620px;
+  padding:7px 10px calc(7px + env(safe-area-inset-bottom));background:rgba(9,22,35,.94);backdrop-filter:blur(18px);border-top:1px solid var(--line)
+}
+.navinner{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.navbtn{border:none;background:transparent;color:var(--muted);border-radius:11px;padding:7px 4px;font-size:9px}.navbtn b{display:block;font-size:16px;line-height:1;margin-bottom:3px;font-weight:500}.navbtn.active{background:var(--card2);color:var(--gold)}
+.toast{position:fixed;z-index:70;left:50%;bottom:86px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#17304b;border:1px solid var(--line);border-radius:11px;padding:10px 12px;font-size:10px;display:flex;gap:10px;align-items:center;transition:.2s;box-shadow:var(--shadow);max-width:90vw}.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}.toast button{border:none;background:none;color:var(--gold);font-weight:800}
+.modal{position:fixed;z-index:80;inset:0;background:rgba(0,0,0,.62);display:none;align-items:flex-end;justify-content:center}.modal.show{display:flex}.sheet{width:100%;max-width:620px;background:var(--card);border:1px solid var(--line);border-radius:20px 20px 0 0;padding:16px 14px calc(18px + env(safe-area-inset-bottom));box-shadow:var(--shadow)}.sheet h3{margin:0 0 4px;font-size:14px}.sheet p{margin:0 0 12px;color:var(--muted);font-size:10px;line-height:1.6}
+.hidden{display:none!important}
+@media(max-width:390px){.hero-main{grid-template-columns:110px 1fr}.ring{width:108px;height:108px}.ring-content strong{font-size:24px}.brow{grid-template-columns:100px 1fr 52px}.asset-grid{grid-template-columns:1fr 1fr}.setting input{width:112px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* FuelMind 1.5 — transactional safety, backup freshness and iPhone diagnostics */
+.detail-chips{display:flex;gap:6px;overflow:auto;padding:2px 0 4px;scrollbar-width:none}.detail-chips::-webkit-scrollbar{display:none}
+.detail-chip{flex:0 0 auto;border:1px solid var(--line);background:rgba(22,43,68,.82);color:var(--text);border-radius:999px;padding:7px 10px;font-size:9.5px;touch-action:manipulation}.detail-chip:active{transform:scale(.98)}
+.field-hint{font-size:8.7px;color:var(--muted);margin-top:5px;line-height:1.5}
+.duplicate-box{display:none;margin:9px 0;border:1px solid rgba(221,169,75,.38);background:rgba(221,169,75,.07);border-radius:12px;padding:10px}.duplicate-box.show{display:block}.duplicate-box strong{font-size:10.5px;color:var(--gold);display:block;margin-bottom:3px}.duplicate-box p{font-size:9px;color:var(--muted);line-height:1.55;margin:0 0 8px}.duplicate-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.duplicate-actions button{padding:9px}
+.safety-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.safety-badge{border:1px solid var(--line);background:var(--card2);border-radius:11px;padding:10px}.safety-badge strong{display:block;font-size:10px}.safety-badge span{display:block;font-size:8.5px;color:var(--muted);margin-top:3px;line-height:1.45}
+.security-note{font-size:9px;color:var(--muted);line-height:1.65;margin:9px 0 0}.security-note b{color:var(--teal)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line);margin-top:9px}.toggle-row span{font-size:10px;color:var(--muted)}
+.switch{position:relative;width:45px;height:26px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:0;flex:0 0 auto}.switch:before{content:"";position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:var(--muted);transition:.18s}.switch.on{background:rgba(56,184,167,.16);border-color:rgba(56,184,167,.45)}.switch.on:before{right:22px;background:var(--teal)}
+.recovery-status{font-size:8.8px;color:var(--muted);line-height:1.55;margin-top:7px}
+body.privacy-mode .hero .metric .v,body.privacy-mode .ring-content strong,body.privacy-mode .txamt,body.privacy-mode .asset .sum,body.privacy-mode .meter .v,body.privacy-mode .mini .value,body.privacy-mode .bval,body.privacy-mode .wamt{filter:blur(7px);user-select:none}
+button:disabled{opacity:.55;cursor:default}
+input[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--red);box-shadow:0 0 0 3px rgba(235,107,89,.07)}
+
+
+/* FuelMind 1.6 Personal CFO RC1.4 Salary Variance + Family Guard — controlled-release safeguards */
+.backup-freshness{margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--card2)}
+.backup-freshness strong{display:block;font-size:10.5px;margin-bottom:3px}.backup-freshness span{display:block;font-size:9px;color:var(--muted);line-height:1.55}
+.backup-freshness.good{border-color:rgba(56,184,167,.38);background:rgba(56,184,167,.07)}
+.backup-freshness.good strong{color:var(--teal)}
+.backup-freshness.warn{border-color:rgba(221,169,75,.38);background:rgba(221,169,75,.07)}
+.backup-freshness.warn strong{color:var(--gold)}
+.backup-freshness.bad{border-color:rgba(235,107,89,.42);background:rgba(235,107,89,.07)}
+.backup-freshness.bad strong{color:var(--red)}
+.diag-banner{border:1px solid rgba(109,168,255,.35);background:rgba(109,168,255,.07);border-radius:14px;padding:11px;margin-bottom:10px}
+.diag-banner strong{display:block;font-size:11px;color:var(--blue);margin-bottom:3px}.diag-banner p{font-size:9.5px;color:var(--muted);line-height:1.6;margin:0}
+.diag-list{display:flex;flex-direction:column;gap:7px}.diag-row{display:grid;grid-template-columns:30px 1fr;gap:9px;align-items:flex-start;border:1px solid var(--line);background:var(--card2);border-radius:11px;padding:9px}
+.diag-icon{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-weight:800;background:rgba(148,166,186,.10);color:var(--muted)}
+.diag-row.pass .diag-icon{background:rgba(56,184,167,.12);color:var(--teal)}.diag-row.warn .diag-icon{background:rgba(221,169,75,.12);color:var(--gold)}.diag-row.fail .diag-icon{background:rgba(235,107,89,.12);color:var(--red)}
+.diag-row strong{display:block;font-size:10px}.diag-row span{display:block;font-size:8.8px;color:var(--muted);line-height:1.5;margin-top:2px}
+.readonly-chip{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(56,184,167,.35);color:var(--teal);border-radius:999px;padding:4px 8px;font-size:8.8px;margin-top:7px}
+
+/* Personal CFO 1.6 */
+.cfo-card{border:1px solid rgba(66,166,214,.24);background:linear-gradient(145deg,rgba(66,166,214,.08),rgba(56,184,167,.04));border-radius:16px;padding:12px}
+.cfo-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.cfo-stat{background:var(--card2);border:1px solid var(--line);border-radius:11px;padding:9px}.cfo-stat span{display:block;font-size:8.5px;color:var(--muted);margin-bottom:3px}.cfo-stat strong{font-size:12px}
+.cfo-progress{height:7px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden;margin-top:6px}.cfo-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:inherit}
+.cfo-decision{margin-top:9px;padding:9px;border-radius:10px;font-size:9.5px;line-height:1.65;border:1px solid var(--line)}.cfo-decision.good{color:var(--teal);background:rgba(56,184,167,.06)}.cfo-decision.warn{color:var(--gold);background:rgba(221,169,75,.06)}.cfo-decision.bad{color:var(--red);background:rgba(235,107,89,.06)}
+.cfo-cap-list{display:flex;flex-direction:column;gap:8px}.cfo-cap-row{font-size:9px}.cfo-cap-top{display:flex;justify-content:space-between;gap:8px;margin-bottom:4px}.cfo-cap-top span{color:var(--muted)}.cfo-cap-top strong{font-size:9px}.cfo-cap-track{height:6px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden}.cfo-cap-track i{display:block;height:100%;border-radius:inherit}.cfo-cap-track i.good{background:var(--teal)}.cfo-cap-track i.watch{background:var(--blue)}.cfo-cap-track i.warn{background:var(--gold)}.cfo-cap-track i.bad{background:var(--red)}
+.cfo-plan-line{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:9.5px}.cfo-plan-line:last-child{border-bottom:0}.cfo-plan-line span{color:var(--muted)}.cfo-plan-line strong{font-variant-numeric:tabular-nums}
+.cfo-cap-meta{font-size:8.4px;color:var(--muted);margin-bottom:4px}.cfo-cap-meta.good{color:var(--teal)}.cfo-cap-meta.watch{color:var(--blue)}.cfo-cap-meta.warn{color:var(--gold)}.cfo-cap-meta.bad{color:var(--red)}
+body:not(.privacy-ready) .app,body:not(.privacy-ready) .bottomnav,body:not(.privacy-ready) .family-shell{visibility:hidden}
+.family-entry{width:100%;margin-top:9px;border:1px solid rgba(56,184,167,.28);background:rgba(56,184,167,.07);color:var(--teal);border-radius:11px;padding:10px;font-weight:750}
+.family-share{width:100%;margin-top:10px;border:1px solid rgba(66,166,214,.30);background:rgba(66,166,214,.07);color:var(--blue);border-radius:11px;padding:10px;font-weight:750}
+.family-shell{display:none;max-width:720px;margin:0 auto;padding:20px 18px 110px;min-height:100vh}.family-active .family-shell{display:block}.family-active .app,.family-active .bottomnav{display:none}.family-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}.family-top h1{font-size:24px;margin:0}.family-top p{font-size:9.5px;color:var(--muted);margin:4px 0 0}.family-unlock{border:1px solid rgba(221,169,75,.35);background:rgba(221,169,75,.08);color:var(--gold);border-radius:10px;padding:8px 10px;font-size:9px}.family-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:rgba(255,255,255,.03);padding:5px;border-radius:13px;margin-bottom:12px}.family-tab{border:0;background:transparent;color:var(--muted);padding:9px;border-radius:9px;font-weight:700}.family-tab.active{background:var(--card2);color:var(--text)}.family-wife-panel,.family-kids-panel{display:block}.family-kids-panel{display:none}.family-kids .family-wife-panel{display:none}.family-kids .family-kids-panel{display:block}.family-hero{border:1px solid rgba(56,184,167,.25);background:linear-gradient(145deg,rgba(56,184,167,.10),rgba(66,166,214,.06));border-radius:18px;padding:14px}.family-hero .eyebrow{font-size:9px;color:var(--muted)}.family-hero .big{font-size:30px;font-weight:850;margin:6px 0}.family-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:10px}.family-stat{background:var(--card2);border:1px solid var(--line);border-radius:11px;padding:10px}.family-stat span{display:block;font-size:8.5px;color:var(--muted)}.family-stat strong{display:block;font-size:13px;margin-top:4px}.family-status{margin-top:9px;padding:9px;border-radius:10px;font-size:9.5px;line-height:1.6;border:1px solid var(--line)}.family-status.good{color:var(--teal);background:rgba(56,184,167,.06)}.family-status.watch{color:var(--blue);background:rgba(66,166,214,.06)}.family-status.warn{color:var(--gold);background:rgba(221,169,75,.06)}.family-status.bad{color:var(--red);background:rgba(235,107,89,.06)}.family-cap-list{display:flex;flex-direction:column;gap:9px}.family-cap-row{font-size:9px}.family-cap-top{display:flex;justify-content:space-between;gap:8px;margin-bottom:3px}.family-cap-top span{color:var(--muted)}.family-cap-meta{font-size:8.5px;margin-bottom:4px}.family-cap-meta.good{color:var(--teal)}.family-cap-meta.watch{color:var(--blue)}.family-cap-meta.warn{color:var(--gold)}.family-cap-meta.bad{color:var(--red)}.kids-pulse{border-radius:22px;padding:24px 18px;text-align:center;border:1px solid var(--line);margin-top:12px}.kids-pulse .orb{width:110px;height:110px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;font-size:44px;background:rgba(56,184,167,.10);border:10px solid rgba(56,184,167,.16)}.kids-pulse.good .orb{color:var(--teal);border-color:rgba(56,184,167,.28)}.kids-pulse.watch .orb{color:var(--blue);border-color:rgba(66,166,214,.28)}.kids-pulse.warn .orb{color:var(--gold);border-color:rgba(221,169,75,.28)}.kids-pulse.bad .orb{color:var(--red);border-color:rgba(235,107,89,.28)}.kids-pulse h2{font-size:21px;margin:0 0 8px}.kids-pulse p{font-size:11px;color:var(--muted);line-height:1.8;margin:0}.family-rule{margin-top:12px;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;font-size:10px;line-height:1.8}.family-rule b{color:var(--teal)}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="topline">
+      <div class="brand">
+        <div class="logo">F</div>
+        <div class="brandtext"><strong>FuelMind</strong><span>المصروف الذكي · 1.6 Personal CFO RC1.4 Salary Variance + Family Guard</span></div>
+      </div>
+      <div class="save" id="save-state">جارٍ التحميل</div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HOME -->
+    <section class="view active" data-view="home">
+      <div class="pagehead"><h1>صباحك المالي واضح.</h1><p>أهم ما تحتاج معرفته عن الدورة الحالية، بدون ازدحام أرقام.</p></div>
+
+      <div class="hero">
+        <div class="cycleline"><span class="kicker">دورة الراتب الحالية</span><span class="cycledate" id="cycle-range">—</span></div>
+        <div class="progress"><i id="cycle-progress"></i></div>
+        <div class="progressmeta"><span id="cycle-day">—</span><span id="cycle-left">—</span></div>
+        <div class="hero-main">
+          <div class="ring" id="main-ring"><div class="ring-content"><strong id="main-pct">—</strong><span>التوقع من الميزانية</span></div></div>
+          <div class="hero-copy">
+            <h2 id="main-status-title">جارٍ التحليل</h2>
+            <p id="main-status-copy">يتم قراءة المصروفات الحالية وبناء التوقع.</p>
+            <span class="status" id="main-status-chip">—</span>
+          </div>
+        </div>
+        <div class="metrics">
+          <div class="metric"><div class="v" id="home-spent">—</div><div class="k" id="home-spent-label">المصروف حتى الآن</div></div>
+          <div class="metric"><div class="v" id="home-remaining">—</div><div class="k">المتبقي من الميزانية</div></div>
+          <div class="metric"><div class="v" id="home-safe">—</div><div class="k">حد الصرف اليومي الآمن</div></div>
+          <div class="metric"><div class="v" id="home-goal-safe">—</div><div class="k" id="home-goal-label">اليومي لتحقيق هدف التوفير</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><h2>مديرك المالي الشخصي</h2><span class="status warn" id="cfo-mode-chip">جاهز للأحد</span></div>
+        <div class="cfo-card">
+          <div class="cfo-grid">
+            <div class="cfo-stat"><span>الراتب الفعلي للدورة</span><strong id="cfo-salary">—</strong></div>
+            <div class="cfo-stat"><span>الالتزامات الكبرى</span><strong id="cfo-obligations">—</strong></div>
+            <div class="cfo-stat"><span>هدف الادخار</span><strong id="cfo-saving-target">—</strong></div>
+            <div class="cfo-stat"><span>ميزانية المعيشة</span><strong id="cfo-living">—</strong></div>
+          </div>
+          <div class="cfo-plan-line"><span>الراتب المرجعي</span><strong id="cfo-salary-reference">—</strong></div>
+          <div class="cfo-plan-line"><span>متغيرات الراتب لهذه الدورة</span><strong id="cfo-salary-variance">—</strong></div>
+          <div id="cfo-salary-variance-note" style="font-size:8.7px;color:var(--muted);line-height:1.55;margin:3px 0 8px">—</div>
+          <div style="margin-top:10px;font-size:9px;color:var(--muted)">الادخار المسجل</div><div style="font-size:11px;font-weight:700" id="cfo-saved-actual">—</div><div class="cfo-progress"><i id="cfo-saving-progress"></i></div>
+          <div class="cfo-grid" style="margin-top:9px"><div class="cfo-stat"><span>المصروف المرن هذا الأسبوع</span><strong id="cfo-flex-week">—</strong></div><div class="cfo-stat"><span id="cfo-flex-limit-label">المتبقي من حد الأسبوع</span><strong id="cfo-flex-left">—</strong></div></div><div class="cfo-plan-line"><span>أقرب فئة للحد هذا الأسبوع</span><strong id="cfo-weekly-pressure">—</strong></div>
+          <div class="cfo-plan-line"><span>الالتزامات الكبرى المسجلة</span><strong id="cfo-obligations-actual">—</strong></div>
+          <div class="cfo-plan-line"><span>إعادة صندوق الطوارئ المسجلة</span><strong id="cfo-emergency-returned">—</strong></div>
+          <div class="cfo-plan-line"><span>شريحة المودم من الدعم</span><strong id="cfo-modem-actual">—</strong></div>
+          <div class="cfo-decision warn" id="cfo-decision">جارٍ بناء القرار المالي.</div><button class="family-entry" id="home-family-mode" type="button">فتح محفظة الأسرة</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><h2>أهم قرار الآن</h2><span>تحليل تلقائي</span></div>
+        <div id="home-alerts"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><h2>تسجيل سريع</h2><span>اختصار لأكثر البنود استخدامًا</span></div>
+        <div class="quickcats" id="quick-cats"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><h2>ملخص الأصول</h2><span>مركبات وعقارات</span></div>
+        <div class="grid2">
+          <div class="mini"><div class="label">دودج</div><div class="value" id="home-dodge">—</div><div class="sub">إجمالي الدورة</div></div>
+          <div class="mini"><div class="label">هايلاندر</div><div class="value" id="home-highlander">—</div><div class="sub">إجمالي الدورة</div></div>
+          <div class="mini"><div class="label">بيت أمي</div><div class="value" id="home-mother">—</div><div class="sub">مرافق ومصروف المنزل</div></div>
+          <div class="mini"><div class="label">عمارة أبوي</div><div class="value" id="home-father">—</div><div class="sub">تشغيل ونظافة ومياه</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADD -->
+    <section class="view" data-view="add">
+      <div class="pagehead"><h1>سجّل المصروف.</h1><p>اكتب الوصف، وسأقترح التصنيف والمركبة أو العقار عندما أستطيع.</p></div>
+      <div class="form-card">
+        <div class="amount-wrap"><label for="f-amount">المبلغ بالريال</label><input id="f-amount" class="amount-input" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0"></div>
+        <div class="field"><label for="f-desc">ما الذي دفعته؟</label><input id="f-desc" type="text" maxlength="140" autocomplete="off" spellcheck="false" placeholder="مثال: آيسكريم للأبناء، بنزين للدودج، تريلة موية لعمارة أبوي"><div class="suggestion" id="suggestion">اقتراح: <button id="apply-suggestion" type="button"></button></div></div>
+        <div class="field"><label for="f-category">التصنيف</label><select id="f-category"></select></div>
+        <div class="field" id="detail-chips-field"><label>اختصارات الوصف</label><div class="detail-chips" id="detail-chips"></div><div class="field-hint">تتغير تلقائيًا حسب التصنيف وتختصر الإدخال المتكرر.</div></div>
+        <div class="field hidden" id="vehicle-field"><label for="f-vehicle">المركبة</label><select id="f-vehicle"><option value="">اختر المركبة</option><option value="dodge">دودج</option><option value="highlander">هايلاندر</option></select></div>
+        <div class="field hidden" id="property-field"><label for="f-property">العقار / الجهة</label><select id="f-property"></select></div>
+        <div class="field hidden" id="meter-field"><label for="f-meter">عداد الكهرباء</label><select id="f-meter"></select></div>
+        <div class="row2"><div class="field"><label for="f-date">التاريخ</label><input id="f-date" type="date"></div><div class="field"><label for="f-note">ملاحظة اختيارية</label><input id="f-note" type="text" maxlength="80" autocomplete="off" placeholder="تفصيل إضافي"></div></div>
+        <div class="duplicate-box" id="duplicate-box"><strong>قد تكون العملية مكررة</strong><p id="duplicate-copy">وجدت عملية مطابقة في السجل. راجعها قبل الحفظ حتى لا يتضاعف المصروف.</p><div class="duplicate-actions"><button class="secondary" id="duplicate-cancel" type="button">مراجعة</button><button class="danger" id="duplicate-force" type="button">حفظ رغم ذلك</button></div></div>
+        <div class="error" id="form-error" role="alert" aria-live="polite"></div>
+        <button class="primary" id="add-expense" type="button">حفظ المصروف</button>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><h2>آخر العمليات</h2><span id="tx-count">—</span></div>
+        <div class="toolbar"><input id="tx-search" type="text" placeholder="ابحث في العمليات"><button class="secondary filterbtn" id="unsynced-filter" type="button">غير المرسلة</button></div>
+        <div class="card" id="tx-list"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><h2>مزامنة المحادثة</h2><span id="unsynced-count">0 عملية</span></div>
+        <div class="card"><p style="font-size:10px;color:var(--muted);line-height:1.65;margin:0 0 9px">ينسخ العمليات الجديدة في صيغة مرتبة، مع السيارة أو العقار والعداد عند وجودها.</p><button class="secondary" id="copy-sync" type="button">نسخ العمليات الجديدة</button><div id="sync-hint" style="font-size:9px;color:var(--muted);margin-top:7px"></div></div>
+      </div>
+    </section>
+
+    <!-- ANALYTICS -->
+    <section class="view" data-view="analytics">
+      <div class="pagehead"><h1>التحليلات.</h1><p>اتجاه الصرف، أكثر البنود ضغطًا، ومقارنة السيارات والعقارات.</p></div>
+
+      <div class="grid2">
+        <div class="mini"><div class="label">الصحة المالية</div><div class="value" id="health-score">—</div><div class="sub">درجة من 100</div></div>
+        <div class="mini"><div class="label">التوقع النهائي</div><div class="value" id="projected-total">—</div><div class="sub">بناءً على المسجل حتى الآن</div></div>
+        <div class="mini"><div class="label">الثابت</div><div class="value" id="fixed-total">—</div><div class="sub">التزامات متكررة</div></div>
+        <div class="mini"><div class="label">الاستثنائي</div><div class="value" id="oneoff-total">—</div><div class="sub">لا يدخل في معدل الحرق</div></div>
+      </div>
+
+      <div class="section"><div class="section-title"><h2>ميزانية الأسبوع حسب الفئة</h2><span id="cfo-week-range">—</span></div><div class="card"><div class="cfo-grid" style="margin-bottom:10px"><div class="cfo-stat"><span>حد الأسبوع المرن</span><strong id="cfo-week-limit">—</strong></div><div class="cfo-stat"><span>المصروف هذا الأسبوع</span><strong id="cfo-week-spent">—</strong></div><div class="cfo-stat"><span>المتبقي هذا الأسبوع</span><strong id="cfo-week-left">—</strong></div><div class="cfo-stat"><span>قاعدة التنبيه</span><strong>70% · 85% · 100%</strong></div></div><div class="cfo-cap-list" id="cfo-weekly-list"></div></div></div>
+
+      <div class="section"><div class="section-title"><h2>ميزانيات الفئات</h2><span>70% انتباه · 85% ضغط · 100% حد</span></div><div class="card"><div class="cfo-cap-list" id="cfo-cap-list"></div><div class="cfo-plan-line"><span>احتياطي الدورة غير المخصص</span><strong id="cfo-reserve">—</strong></div><div class="cfo-plan-line"><span>الهامش النقدي خارج ميزانية المعيشة</span><strong id="cfo-cash-buffer">—</strong></div><div class="cfo-plan-line"><span>خطة الدعم السكني</span><strong id="cfo-support-plan" style="text-align:left;max-width:65%">—</strong></div></div></div>
+
+      <div class="section"><div class="section-title"><h2>آخر 7 أيام</h2><span id="week-compare">—</span></div><div class="card"><div class="week" id="week-bars"></div></div></div>
+
+      <div class="section"><div class="section-title"><h2>مسار الحرق المتغيّر</h2><span>مقابل المسار المثالي</span></div><div class="card"><svg class="chart" id="trend-svg" viewBox="0 0 440 150"></svg><div class="legend"><span><i class="sw"></i>الفعلي</span><span><i class="sw" style="background:var(--muted)"></i>المثالي</span><span><i class="sw" style="background:var(--gold)"></i>اليوم</span></div></div></div>
+
+      <div class="section"><div class="section-title"><h2>أين يذهب المال؟</h2><span>كل الفئات</span></div><div class="card"><div class="breakdown" id="category-breakdown"></div></div></div>
+
+      <div class="section"><div class="section-title"><h2>المركبات</h2><span>دودج مقابل هايلاندر</span></div><div class="asset-grid"><div class="asset"><div class="name">دودج</div><div class="sum" id="dodge-total">—</div><div class="desc" id="dodge-desc">—</div></div><div class="asset"><div class="name">هايلاندر</div><div class="sum" id="highlander-total">—</div><div class="desc" id="highlander-desc">—</div></div></div><div class="card" style="margin-top:8px;font-size:10px;color:var(--muted)" id="vehicle-compare">—</div></div>
+
+      <div class="section"><div class="section-title"><h2>العقارات والمنازل</h2><span>تكلفة مستقلة لكل جهة</span></div><div class="asset-grid"><div class="asset"><div class="name">بيتي</div><div class="sum" id="myhome-total">—</div><div class="desc" id="myhome-desc">—</div></div><div class="asset"><div class="name">بيت أمي</div><div class="sum" id="mother-total">—</div><div class="desc" id="mother-desc">—</div></div></div><div class="asset" style="margin-top:8px"><div class="name">عمارة أبوي</div><div class="sum" id="father-total">—</div><div class="desc" id="father-desc">—</div></div></div>
+
+      <div class="section"><div class="section-title"><h2>عدادات الكهرباء</h2><span>3 عدادات</span></div><div class="card"><div class="meters"><div class="meter"><div class="v" id="meter-home-1">—</div><div class="k">بيتي 1</div></div><div class="meter"><div class="v" id="meter-home-2">—</div><div class="k">بيتي 2</div></div><div class="meter"><div class="v" id="meter-mother">—</div><div class="k">بيت أمي</div></div></div><div id="meter-unassigned" style="font-size:9px;color:var(--muted);text-align:center;margin-top:7px"></div></div></div>
+
+      <div class="section"><div class="section-title"><h2>مقارنة الدورة السابقة</h2><span id="history-count">0 مؤرشفة</span></div><div class="card" id="cycle-compare">ستظهر المقارنة بعد أرشفة أول دورة.</div></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="view" data-view="settings">
+      <div class="pagehead"><h1>الإعدادات والتصنيفات.</h1><p>كل ما يخص الميزانية، الدورة، النسخ الاحتياطي، ودليل البنود.</p></div>
+
+      <div class="section-title"><h2>الدورة والميزانية</h2><span>تؤثر مباشرة في التوقعات</span></div>
+      <div class="card">
+        <div class="setting"><label for="budget">ميزانية الدورة</label><input id="budget" type="number" min="1" step="100"></div>
+        <div class="setting"><label for="cycle-days">عدد أيام الدورة</label><input id="cycle-days" type="number" min="1" max="62"></div>
+        <div class="setting"><label for="cycle-start">تاريخ البداية</label><input id="cycle-start" type="date"></div>
+        <div class="setting"><label for="savings-target">هدف التوفير</label><input id="savings-target" type="number" min="0" step="100"></div>
+      </div>
+
+      <div class="section-title"><h2>الملف المالي الخاص</h2><span>محلي — لا يُرفع إلى GitHub</span></div>
+      <div class="card">
+        <div class="backup-freshness bad" id="private-profile-status"><strong>الملف المالي الخاص غير مهيأ</strong><span>استورد الملف الخاص من جهازك قبل بدء Personal CFO.</span></div>
+        <div class="datagrid" style="margin-top:8px"><label class="secondary" for="private-profile-file" style="display:flex;align-items:center;justify-content:center;cursor:pointer">استيراد ملف CFO خاص</label><button class="secondary" id="export-private-profile" type="button">حفظ نسخة من ملف CFO</button></div>
+        <input id="private-profile-file" type="file" accept=".json,application/json,text/plain" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none">
+        <p class="security-note"><b>خصوصية:</b> ملف CFO الخاص يحتوي أرقامك الشخصية. احفظه في «الملفات» فقط، ولا ترفعه إلى المستودع العام أو ترسله إلى أي جهة.</p>
+      </div>
+
+      <div class="section-title"><h2>خطة راتب الأحد — Personal CFO</h2><span>تطبيق محمي</span></div>
+      <div class="card">
+        <div class="cfo-plan-line"><span>الراتب المرجعي</span><strong id="cfo-plan-base-salary">—</strong></div>
+        <div class="cfo-plan-line"><span>الراتب الفعلي لهذه الدورة</span><strong id="cfo-plan-salary">—</strong></div>
+        <div class="cfo-plan-line"><span>متغيرات الراتب</span><strong id="cfo-plan-salary-variance">—</strong></div>
+        <div id="cfo-plan-salary-note" style="font-size:8.7px;color:var(--muted);line-height:1.55;margin:4px 0 8px">—</div>
+        <div class="cfo-plan-line"><span>التمويل الشخصي</span><strong id="cfo-plan-personal-loan">—</strong></div>
+        <div class="cfo-plan-line"><span>التمويل العقاري</span><strong id="cfo-plan-mortgage">—</strong></div>
+        <div class="cfo-plan-line"><span>السلف القديم</span><strong id="cfo-plan-old-debt">—</strong></div>
+        <div class="cfo-plan-line"><span>هدف الادخار</span><strong id="cfo-plan-savings">—</strong></div>
+        <div class="cfo-plan-line"><span>ميزانية المعيشة</span><strong id="cfo-plan-living">—</strong></div>
+        <div class="cfo-plan-line"><span>الهامش النقدي</span><strong id="cfo-plan-buffer">—</strong></div>
+        <div id="cfo-plan-gate-copy" style="font-size:9px;color:var(--muted);line-height:1.65;margin:9px 0">استورد ملف CFO الخاص أولًا.</div>
+        <button class="primary" id="start-cfo-cycle" type="button">بدء دورة راتب Personal CFO بأمان</button>
+      </div>
+
+      <div class="section-title"><h2>إدارة البيانات</h2><span>نسخ واستعادة</span></div>
+      <div class="card">
+        <div class="datagrid">
+          <button class="secondary" id="export-csv" type="button">تصدير CSV</button>
+          <button class="secondary" id="backup-json" type="button">نسخة JSON</button>
+          <label class="secondary" id="restore-json" for="restore-file" style="display:flex;align-items:center;justify-content:center;cursor:pointer">استعادة نسخة</label>
+          <button class="danger" id="new-cycle" type="button">بدء دورة جديدة</button>
+        </div>
+        <input id="restore-file" type="file" accept=".json,application/json,text/plain" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none">
+        <div style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
+          <div style="font-size:11px;font-weight:700;margin-bottom:4px">استعادة بديلة للآيفون</div>
+          <div style="font-size:9.5px;color:var(--muted);line-height:1.7;margin-bottom:8px">إذا لم تستجب نافذة الملفات، الصق رمز الاستعادة الخاص بك هنا ثم اضغط استعادة من الرمز.</div>
+          <textarea id="restore-token" rows="3" maxlength="2800000" placeholder="الصق رمز الاستعادة هنا" style="width:100%;resize:vertical;background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px;font-family:ui-monospace,monospace;font-size:11px"></textarea>
+          <button class="secondary" id="restore-token-btn" type="button" style="width:100%;margin-top:8px">استعادة من الرمز</button>
+          <div id="restore-status" style="font-size:10px;color:var(--muted);margin-top:7px;line-height:1.6"></div>
+        </div>
+        <div class="backup-freshness warn" id="backup-freshness">
+          <strong id="backup-freshness-title">جارٍ فحص حداثة النسخة الاحتياطية</strong>
+          <span id="backup-freshness-copy">يقارن FuelMind آخر نسخة أنشأها بحالة بياناتك الحالية.</span>
+        </div>
+        <button class="secondary" id="confirm-backup-saved" type="button" style="width:100%;margin-top:8px">تأكيد أن ملف النسخة محفوظ في «الملفات»</button>
+      </div>
+
+      <div class="section-title"><h2>محفظة الأسرة</h2><span>خصوصية ومشاركة مدروسة</span></div>
+      <div class="card">
+        <div style="font-size:11px;font-weight:750;margin-bottom:5px">Family Wallet + Family Pulse</div>
+        <div style="font-size:9.5px;color:var(--muted);line-height:1.75">واجهة منفصلة تعرض فقط بعض مصروفات المعيشة. لا تعرض الراتب أو الادخار أو القروض أو صندوق الطوارئ أو التحليلات الخاصة. الإصدار الحالي قراءة فقط لحماية السجل. الأرقام الخاصة نفسها تأتي من ملف CFO محلي ولا تُضمّن في الكود العام. رمز المدير حاجز خصوصية محلي للاستخدام الأسري، وليس تشفيرًا لقاعدة البيانات.</div>
+        <div class="recovery-status" id="family-lock-status" style="margin-top:9px">جارٍ فحص رمز المدير.</div>
+        <div class="datagrid" style="margin-top:8px"><button class="secondary" id="family-set-pin" type="button">تعيين/تغيير رمز المدير</button><button class="primary" id="open-family-mode" type="button">فتح وضع الأسرة</button></div>
+      </div>
+
+      <div class="section-title"><h2>الخصوصية ونقاط الأمان</h2><span>حماية محلية</span></div>
+      <div class="card">
+        <div class="safety-grid">
+          <div class="safety-badge"><strong>محلي على الجهاز</strong><span>لا يرسل FuelMind بيانات المصروفات إلى خادم خارجي.</span></div>
+          <div class="safety-badge"><strong>تحقق عند الحفظ</strong><span>يتم التأكد من كتابة البيانات بعد كل عملية مهمة.</span></div>
+        </div>
+        <div class="toggle-row"><span>إخفاء المبالغ عند عرض التطبيق</span><button class="switch" id="privacy-toggle" type="button" role="switch" aria-checked="false" aria-label="إخفاء المبالغ"></button></div>
+        <div class="datagrid" style="margin-top:8px">
+          <button class="secondary" id="make-recovery" type="button">إنشاء نقطة أمان</button>
+          <button class="secondary" id="restore-recovery" type="button">استعادة نقطة الأمان</button>
+        </div>
+        <div class="recovery-status" id="recovery-status">لم يتم إنشاء نقطة أمان يدوية بعد.</div>
+        <p class="security-note"><b>مهم:</b> لا تضع ملفات النسخ الاحتياطية أو بياناتك المالية داخل مستودع GitHub العام. الكود فقط هو الذي يُرفع للمستودع.</p>
+      </div>
+
+      <div class="section-title"><h2>فحص الآيفون</h2><span>قراءة فقط</span></div>
+      <div class="card">
+        <div style="font-size:11px;font-weight:700;margin-bottom:4px">تشخيص آمن دون لمس البيانات</div>
+        <div style="font-size:9.5px;color:var(--muted);line-height:1.7;margin-bottom:9px">يفحص التثبيت وService Worker والتخزين وبنية السجل بالقراءة فقط، ولا يضيف أو يحذف أو يعدّل أي مصروف أو إعداد.</div>
+        <button class="secondary" id="open-iphone-check" type="button">فتح صفحة فحص الآيفون</button>
+      </div>
+
+      <div class="card" id="install-card">
+        <div style="font-size:11px;font-weight:700;margin-bottom:4px">تثبيت FuelMind على الآيفون</div>
+        <div style="font-size:9.5px;color:var(--muted);line-height:1.7">بعد فتح النسخة المستضافة في Safari: مشاركة ← إضافة إلى الشاشة الرئيسية. يعمل التطبيق بعد ذلك بواجهة مستقلة ويحتفظ ببياناته على الجهاز.</div>
+      </div>
+
+      <div class="section-title"><h2>دليل التصنيف</h2><span id="category-count">—</span></div>
+      <div class="card catsearch"><input id="category-search" type="text" placeholder="ابحث: آيسكريم، خضار، تريلة موية، بنزين..."><div id="category-search-result" style="font-size:9px;color:var(--muted);line-height:1.6;margin-top:6px">اكتب كلمة لمعرفة التصنيف المناسب.</div></div>
+      <div id="category-guide"></div>
+    </section>
+
+    <!-- IPHONE CHECK — FuelMind 1.5, strictly read-only -->
+    <section class="view" data-view="iphone-check">
+      <div class="pagehead"><h1>فحص الآيفون.</h1><p>تشخيص قراءة فقط للتثبيت والتخزين والكاش وسلامة السجل. لا يكتب FuelMind أي قيمة أثناء هذا الفحص.</p></div>
+      <div class="diag-banner"><strong>وضع الفحص الآمن</strong><p>سيأخذ بصمة للبيانات في الذاكرة قبل الفحص وبعده، ويؤكد أنها لم تتغير. لا تتم إضافة مصروفات، ولا تعديل الإعدادات، ولا إنشاء نقاط أمان.</p><div class="readonly-chip">◉ قراءة فقط</div></div>
+      <div class="card">
+        <button class="primary" id="run-iphone-check" type="button">تشغيل الفحص الآن</button>
+        <button class="secondary" id="back-from-iphone-check" type="button" style="margin-top:7px">العودة إلى الإعدادات</button>
+      </div>
+      <div class="section">
+        <div class="section-title"><h2>نتيجة الفحص</h2><span id="diag-summary">لم يبدأ بعد</span></div>
+        <div class="diag-list" id="diag-results"><div class="diag-row"><div class="diag-icon">…</div><div><strong>بانتظار التشغيل</strong><span>اضغط «تشغيل الفحص الآن» لإجراء الفحوصات بالقراءة فقط.</span></div></div></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<section class="family-shell" id="family-shell" aria-hidden="true">
+  <div class="family-top"><div><h1>محفظة الأسرة</h1><p>احتياجات البيت واضحة، والتفاصيل المالية الخاصة تبقى للمدير فقط.</p></div><button class="family-unlock" id="family-unlock" type="button">دخول المدير</button></div>
+  <div class="family-tabs"><button class="family-tab active" id="family-wife-tab" type="button">محفظة البيت</button><button class="family-tab" id="family-kids-tab" type="button">نبض الأبناء</button></div>
+  <div class="family-wife-panel">
+    <div class="family-hero"><div class="eyebrow" id="family-week-range">—</div><div class="big" id="family-week-left">—</div><div style="font-size:10px;color:var(--muted)">المتبقي من المحفظة المرنة لهذا الأسبوع</div><div class="family-grid"><div class="family-stat"><span>حد الأسبوع</span><strong id="family-week-limit">—</strong></div><div class="family-stat"><span>المصروف هذا الأسبوع</span><strong id="family-week-spent">—</strong></div><div class="family-stat"><span>المتبقي من فئات البيت الشهرية</span><strong id="family-month-left">—</strong></div><div class="family-stat"><span>المعروض هنا فقط</span><strong>7 فئات معيشة</strong></div></div><div class="family-status good" id="family-status">جارٍ بناء حالة البيت.</div><button class="family-share" id="family-share" type="button">مشاركة ملخص الأسرة فقط</button></div>
+    <div class="section"><div class="section-title"><h2>فئات البيت</h2><span>لا تشمل الراتب أو الادخار أو الديون</span></div><div class="card"><div class="family-cap-list" id="family-cap-list"></div></div></div>
+    <div class="family-rule"><b>قاعدة البيت:</b> الاحتياجات الأساسية أولًا. إذا اقتربت فئة من حدها، نؤجل الكماليات بدل المساس بالادخار أو الطوارئ.</div>
+  </div>
+  <div class="family-kids-panel">
+    <div class="kids-pulse good" id="kids-pulse"><div class="orb">●</div><h2 id="kids-pulse-title">بيتنا ضمن الخطة</h2><p id="kids-pulse-copy">نشتري احتياجاتنا أولًا ثم نختار الكماليات بهدوء.</p></div>
+    <div class="family-rule"><b>قاعدة الأبناء:</b> نحتاج؟ نختار. لا نحتاج الآن؟ نؤجل. الهدف هو الاختيار الذكي، وليس الحرمان.</div>
+  </div>
+</section>
+
+<nav class="bottomnav">
+  <div class="navinner">
+    <button class="navbtn active" data-go="home" type="button"><b>⌂</b>الرئيسية</button>
+    <button class="navbtn" data-go="add" type="button"><b>＋</b>إضافة</button>
+    <button class="navbtn" data-go="analytics" type="button"><b>⌁</b>التحليلات</button>
+    <button class="navbtn" data-go="settings" type="button"><b>⚙</b>الإعدادات</button>
+  </div>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><span id="toast-text"></span><button id="undo-btn" class="hidden" type="button">تراجع</button></div>
+
+<div class="modal" id="cycle-modal">
+  <div class="sheet"><h3>بدء دورة جديدة</h3><p id="cycle-modal-copy">سيتم أرشفة الدورة وبدء الجديدة داخل commit موحد مع سجل rollback. إذا فشل أي جزء تعود الحالة السابقة كاملة.</p><div class="row2"><button class="secondary" id="cycle-cancel" type="button">إلغاء</button><button class="danger" id="cycle-confirm" type="button">أرشفة وبدء جديد</button></div></div>
+</div>
+
+<div class="modal" id="family-pin-modal">
+  <div class="sheet"><h3 id="family-pin-title">دخول المدير</h3><p id="family-pin-copy">أدخل رمز المدير.</p><div class="field"><label for="family-pin-input">رمز المدير</label><input id="family-pin-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"></div><div class="field hidden" id="family-pin-confirm-field"><label for="family-pin-confirm">تأكيد الرمز</label><input id="family-pin-confirm" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"></div><div class="error" id="family-pin-error"></div><div class="row2"><button class="secondary" id="family-pin-cancel" type="button">إلغاء</button><button class="primary" id="family-pin-submit" type="button">متابعة</button></div></div>
+</div>
+
+<div class="modal" id="edit-modal">
+  <div class="sheet">
+    <h3>تعديل المصروف</h3>
+    <p>عدّل البيانات ثم احفظ. سيبقى معرف العملية كما هو ولن تتكرر.</p>
+    <div class="row2">
+      <div class="field"><label for="edit-amount">المبلغ</label><input id="edit-amount" type="number" min="0.01" step="0.01" inputmode="decimal"></div>
+      <div class="field"><label for="edit-date">التاريخ</label><input id="edit-date" type="date"></div>
+    </div>
+    <div class="field"><label for="edit-desc">الوصف</label><input id="edit-desc" type="text" maxlength="140"></div>
+    <div class="field"><label for="edit-category">التصنيف</label><select id="edit-category"></select></div>
+    <div class="field hidden" id="edit-vehicle-field"><label for="edit-vehicle">المركبة</label><select id="edit-vehicle"><option value="">اختر المركبة</option><option value="dodge">دودج</option><option value="highlander">هايلاندر</option></select></div>
+    <div class="field hidden" id="edit-property-field"><label for="edit-property">العقار / الجهة</label><select id="edit-property"></select></div>
+    <div class="field hidden" id="edit-meter-field"><label for="edit-meter">عداد الكهرباء</label><select id="edit-meter"></select></div>
+    <div class="field"><label for="edit-note">ملاحظة</label><input id="edit-note" type="text" maxlength="80"></div>
+    <div class="error" id="edit-error"></div>
+    <div class="row2"><button class="secondary" id="edit-cancel" type="button">إلغاء</button><button class="primary" id="edit-save" type="button">حفظ التعديل</button></div>
+  </div>
+</div>
+
+<script src="./core.js" defer></script>
+<script src="./app.js" defer></script>
+</body>
+</html>
